@@ -13,14 +13,14 @@ block content
 					th(scope='col')
 					th(scope='col') COMPLETED
 			tbody
-			each transaction in transactions()
+			each transaction in transactionsShow()
 				tr
-					th(scope='row')= transaction.id
+					th(scope='row')= transaction._id
 					td= getUserById(transaction.userId).name
 					td= getBookById(transaction.bookId).title
 					td
 						a(class="btn btn-success" role="button" href="/transactions/" + transaction.id + "/complete") COMPLETE
-					if transaction.isComplete === "true"
+					if transaction.isComplete === true
 						td
 							img(src='https://img.icons8.com/fluent/48/000000/checked-2.png')
 		a(class="btn btn-primary m-2" role="button" href="/transactions/create") ADD TRANSACTION

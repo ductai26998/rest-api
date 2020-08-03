@@ -1,23 +1,25 @@
-var db = require('../db');
+var User = require('../models/user.model');
 
-module.exports.requireAuth = (request, response, next) => {
-	var user = db.get('users').find({id: request.signedCookies.userId}).value();
+module.exports.requireAuth = async (request, response, next) => {
+	var user = await User.findOne({_id: request.signedCookies.userId});
 
 	if (!request.signedCookies.userId) {
-		response.redirect('auth/login');
+		response.redirect('/auth/login');
 		return;
 	}
 
 
 	if (!user) {
-  		response.redirect('auth/login', {
-  			errors: ['User does not exist!'],
+  		response.render('auth/login', {
+  			errors: function() {
+  				return ['User does not exist!'];
+  			},
   			values: request.body
   		});
 		return;
 	}
 
-	if (user.isAdmin !== "true") {
+	if (user.isAdmin !== true) {
 		response.render('error/index');
 	}
 
@@ -26,8 +28,8 @@ module.exports.requireAuth = (request, response, next) => {
 	next();
 }
 
-module.exports.setLocalUser = (request, response, next) => {
-	var user = db.get('users').find({id: request.signedCookies.userId}).value();
+module.exports.setLocalUser = async (request, response, next) => {
+	var user = await User.findOne({_id: request.signedCookies.userId});
 
 	response.locals.user = user;
 

@@ -23,8 +23,8 @@ block content
           td= user.name
           td= user.phone
           td
-            a(class="btn btn-danger btn btn-primary ml-2 float-right" role="button" href="/users/" + user.id + "/delete") DELETE
-            a(class="btn btn-primary ml-2 float-right" role="button" href="/users/" + user.id + "/profile") UPDATE PROFILE
+            a(class="btn btn-danger btn btn-primary ml-2 float-right" role="button" href="/users/" + user._id + "/delete") DELETE
+            a(class="btn btn-primary ml-2 float-right" role="button" href="/users/" + user._id + "/profile") UPDATE PROFILE
     a(class="btn btn-primary m-2" role="button" href="/users/create") ADD USER
 block footer
   .container-sm

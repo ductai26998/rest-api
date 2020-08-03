@@ -1,11 +1,10 @@
-const shortid = require('shortid');
+var Session = require('../models/session.model');
+var User = require('../models/user.model');
+var shortid = require('shortid');
 
-var db = require('../db');
-
-module.exports = (request, response, next) => {
-	var sessionId = request.signedCookies.sessionId;
-	var session = db.get('sessions').find({id: sessionId}).value();
-	var user = db.get('users').find({id: request.signedCookies.userId}).value();
+module.exports = async (request, response, next) => {
+	var session = await Session.findOne({id: request.signedCookies.sessionId});
+	var user = await User.findOne({id: request.signedCookies.userId});
 
 	if (!request.signedCookies.sessionId) {
 		var sessionId = shortid.generate();
@@ -13,14 +12,14 @@ module.exports = (request, response, next) => {
 	    signed: true
 	  });
 
-	  db.get("sessions").push({
-	  	id: sessionId
-	  }).write();
+	  await Session.create({
+	  	_id: sessionId
+	  });
 	}
-	if (user && user.isAdmin !== "true") {
+	if (user && user.isAdmin === false) {
 		response.locals.cartId = user.id;
 		response.locals.numberBookInCart = Object.keys(user.cart).length;
-	} else if (session.cart) {
+	} else if (session && session.cart) {
 		response.locals.cartId = session.id;
 		response.locals.numberBookInCart = Object.keys(session.cart).length;
 	}

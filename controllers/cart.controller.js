@@ -1,13 +1,16 @@
-var db = require('../db');
-const shortid = require('shortid');
+var Book = require('../models/book.model');
+var User = require('../models/user.model');
+var Session = require('../models/session.model');
+var Transaction = require('../models/transaction.model');
+// const shortid = require('shortid');
 
-module.exports.get = (request, response, next) => {
+module.exports.get = async (request, response, next) => {
 	var booksInCart = [];
 	var cart = {};
 	var userId = request.signedCookies.userId;
-	var user = db.get('users').find({id: userId}).value();
+	var user = await User.findOne({id: userId});
 	var sessionId = request.signedCookies.sessionId;
-	var session = db.get('sessions').find({id: sessionId}).value();
+	var session = await Session.findOne({id: sessionId});
 	if (!user) {
 		Object.assign(cart, session.cart);
 	} else {
@@ -15,7 +18,8 @@ module.exports.get = (request, response, next) => {
 	}
 
 	for (var bookId in cart) {
-		booksInCart.push(db.get('books').find({id: bookId}).value());
+		var book = await Book.findOne({id: bookId})
+		booksInCart.push(book);
 	}
 
 	response.render("cart/index", {
@@ -23,38 +27,46 @@ module.exports.get = (request, response, next) => {
 	});
 }
 
-module.exports.borrow = (request, response, next) => {
+module.exports.borrow = async (request, response, next) => {
 	var cart = {};
 	var userId = request.signedCookies.userId;
-	var user = db.get('users').find({id: userId}).value();
+	var user = await User.findOne({id: userId});
 	Object.assign(cart, user.cart);
 
 	for (var bookId in cart) {
-		request.body.id = shortid.generate();
-		request.body.isComplete = "false";
-		request.body.userId = request.signedCookies.userId;
-		request.body.bookId = bookId;
+		var transaction = {
+			userId: request.signedCookies.userId,
+			bookId: bookId,
+			isComplete: false
+		};
 
-		db.get('transactions').push(request.body).write();
-		// Object.assign(request.body, {});
+		await Transaction.create(transaction);
 	}
-	user.cart = {};
+	await User.cart.remove({});
 	response.redirect('/books');
-}
+} 
 
-module.exports.addToCart = (request, response, next) => {
+module.exports.addToCart = async (request, response, next) => {
 	var bookId = request.params.id;
 	var sessionId = request.signedCookies.sessionId;
-	var count = 0;
-	if (!db.get('sessions').find({id: sessionId}).get('cart.' + bookId).value()) {
-		count = 0;
+	var session = await Session.findOne({_id: sessionId}).lean();
+	var check = false;
+	if (!session.cart) {
+		session.cart = {
+			[bookId]: 1
+		}
+		console.log('data is ready', session);
+		await Session.findByIdAndUpdate(sessionId, session).lean();
+		console.log(await Session.findById(sessionId).lean());
 	}
+
+	var count = session.cart[bookId];
 
 	if (!sessionId) {
 		response.redirect('/books');
 	}
-
-	db.get('sessions').find({id: sessionId}).set('cart.' + bookId, count + 1).write();
+	session.cart[bookId] = count + 1;
+	await Session.findByIdAndUpdate(sessionId, session);
 
 	response.redirect('/books');
 	next();

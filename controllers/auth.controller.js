@@ -1,5 +1,7 @@
 var bcrypt = require('bcrypt');
-var db = require('../db');
+var Book = require('../models/book.model');
+var User = require('../models/user.model');
+var Session = require('../models/session.model');
 const sgMail = require('@sendgrid/mail');
 
 module.exports.login = (request, response) => {
@@ -9,9 +11,9 @@ module.exports.login = (request, response) => {
 module.exports.postLogin = async (request, response) => {
 	var email = request.body.email;
 	var password = request.body.password;
-  var user = db.get('users').find({email: email}).value();
+  var user = await User.findOne({email: email});
   var sessionId = request.signedCookies.sessionId;
-  var session = db.get('sessions').find({id: sessionId}).value();
+  var session = await Session.findOne({_id: sessionId});
 
   if (!user) {
   	response.render('auth/login', {
@@ -61,7 +63,7 @@ module.exports.postLogin = async (request, response) => {
   if (user.cart) {
     Object.assign(user.cart, session.cart);
   }
-  db.get('users').find({email: email}).update('cart', user.cart).write();
+  User.findOneAndUpdate({email: email}, {$set: {cart: user.cart}});
 
 	response.cookie("userId", user.id, {
     signed: true

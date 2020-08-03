@@ -1,8 +1,6 @@
+var User = require('../models/user.model');
 var bcrypt = require('bcrypt');
-var db = require('../db');
 var cloudinary = require('cloudinary').v2;
-
-const shortid = require('shortid');
 
 cloudinary.config({ 
   cloud_name: 'ductai26998', 
@@ -10,15 +8,17 @@ cloudinary.config({
   api_secret: '_jqie405YJR-Jct1XSBwKkbUUy8' 
 });
 
-module.exports.get = (request, response) => {
+module.exports.get = async (request, response) => {
+  var users = await User.find().lean();
   response.render('users/index', {
-    users: db.get('users').value()
+    users: users
   });
 };
 
-module.exports.search = (request, response) => {
+module.exports.search = async (request, response) => {
   var q = request.query.q;
-  var matchedUsers = db.get('users').value().filter(function(user) {
+  var users = await User.find().lean();
+  var matchedUsers = users.filter(function(user) {
     return user.name.toLowerCase().indexOf(q.toLowerCase()) !== -1;
   });
   response.render('users/index', {
@@ -31,8 +31,7 @@ module.exports.create = (request, response) => {
   response.render('users/create');
 }
 
-module.exports.postCreate = (request, response) => {
-  request.body.id = shortid.generate();
+module.exports.postCreate = async (request, response) => {
   if (!request.file) {
     request.body.avatar = "updates/avt.jpg";
   } else {
@@ -44,27 +43,23 @@ module.exports.postCreate = (request, response) => {
   request.body.isAdmin = "false";
   request.body.wrongLoginCount = 0;
   request.body.cart = {};
-  bcrypt.hash(request.body.password, 10, function(err, hash) {
-      // Store hash in your password DB.
-      console.log(hash);
-      request.body.password = hash;
-       console.log(request.body);
-  db.get('users').push(request.body).write();
-  });
+  var hashedPassword = await bcrypt.hash(request.body.password, 10)
+  request.body.password = hashedPassword;
+  await User.create(request.body);
  
   response.redirect('/users');
 };
 
-module.exports.delete = (request, response) => {
-  // var id = request.params.id;
-  db.get('users').remove(request.params).write();
+module.exports.delete = async (request, response) => {
+  await User.deleteOne({_id: request.params.id});
   response.redirect('/users');
 };
 
-module.exports.profile = (request, response) => {
+module.exports.profile = async (request, response) => {
+  var user = await User.findById(request.params.id).lean();
   response.render('users/profile', {
     id: request.params.id,
-    user: db.get('users').find({id: request.params.id}).value(),
+    user: user,
     getAvatarUrl: function(url) {
       if (url.indexOf('http') === 0) {
         return url;
@@ -74,16 +69,10 @@ module.exports.profile = (request, response) => {
   });
 };
 
-module.exports.postProfile = (request, response) => {
+module.exports.postProfile = async(request, response) => {
   var userId = request.params.id;
-  db.get('users')
-    .find({id: userId})
-    .assign({
-      name: request.body.name,
-      phone: request.body.phone,
-      email: request.body.email
-    })
-    .write();
+  await User.findByIdAndUpdate(userId, request.body);
+
   response.redirect('/users');
 };
 
@@ -101,12 +90,7 @@ module.exports.postAvatar = async (request, response) => {
     request.body.avatar = request.file.path.split("\\").slice(1).join("/");
     const result = await cloudinary.uploader.upload(request.file.path);
 
-    db.get('users')
-    .find({ id: id })
-    .assign({
-      avatar: request.body.avatar
-    })
-    .write();
+    await User.findByIdAndUpdate(id, {avatar: request.body.avatar});
   }
   response.redirect('/users/' + id + '/profile');
 };

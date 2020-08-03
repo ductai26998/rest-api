@@ -7,6 +7,9 @@ require('dotenv').config();
 // console.log(process.env);
 const express = require("express");
 var cookieParser = require("cookie-parser");
+var mongoose = require('mongoose');
+
+mongoose.connect(process.env.MONGO_URL, {useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false});
 
 const app = express();
 

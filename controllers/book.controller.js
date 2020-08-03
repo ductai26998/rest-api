@@ -1,5 +1,5 @@
-var db = require('../db');
-const shortid = require('shortid');
+var Book = require('../models/book.model');
+var User = require('../models/user.model');
 var cloudinary = require('cloudinary').v2;
 
 cloudinary.config({ 
@@ -8,23 +8,21 @@ cloudinary.config({
   api_secret: '_jqie405YJR-Jct1XSBwKkbUUy8' 
 });
 
-module.exports.get = (request, response) => {
-  var page = parseInt(request.query.page) || 1;
-  var perPage = 8;
-  var start = (page - 1) * perPage;
-  var end = page * perPage;
+module.exports.get = async (request, response) => {
 
-  var user = db.get('users').find({id: request.signedCookies.userId}).value();
+  var user = await User.findById(request.signedCookies.userId);
+
+  var books = await Book.find();
 
   response.render('books/index', {
     isAdmin: function() {
-      if (!user || user.isAdmin !== "true") {
+      if (!user || user.isAdmin !== true) {
         return false;
       }
       return true;
     },
-    page: page,
-    books: db.get('books').value().slice(start, end),
+    // page: page,
+    books: books,
     getCoverUrl: function(url) {
       if (url.indexOf('http') === 0) {
         return url;
@@ -34,12 +32,20 @@ module.exports.get = (request, response) => {
   });
 };
 
-module.exports.search = (request, response) => {
+module.exports.search = async (request, response) => {
+  var user = await User.find({id: request.signedCookies.userId});
   var q = request.query.q;
-  var matchedBooks = db.get('books').value().filter(function(book) {
+  var books = await Book.find();
+  var matchedBooks = books.filter(function(book) {
     return book.title.toLowerCase().indexOf(q.toLowerCase()) !== -1;
   });
   response.render('books/index', {
+    isAdmin: function() {
+      if (!user || user.isAdmin !== true) {
+        return false;
+      }
+      return true;
+    },
     books: matchedBooks,
     getCoverUrl: function(url) {
       if (url.indexOf('http') === 0) {
@@ -54,8 +60,7 @@ module.exports.create = (request, response) => {
   response.render('books/create');
 };
 
-module.exports.postCreate = (request, response) => {
-  request.body.id = shortid.generate();
+module.exports.postCreate = async (request, response) => {
   if (!request.file) {
     request.body.cover = "updates/avt.jpg";
   } else {
@@ -64,13 +69,13 @@ module.exports.postCreate = (request, response) => {
       console.log(result, error)
     });
   }
-  db.get('books').push(request.body).write();
 
+  await Book.create(request.body);
   response.redirect('/books');
 };
 
-module.exports.delete = (request, response) => {
-  db.get('books').remove(request.params).write();
+module.exports.delete = async (request, response) => {
+  await Book.deleteOne({_id: request.params.id});
   response.redirect('/books');
 };
 
@@ -78,11 +83,8 @@ module.exports.update = (request, response) => {
   response.render('books/update', {id: request.params.id});
 };
 
-module.exports.postUpdate = (request, response) => {
+module.exports.postUpdate = async (request, response) => {
   var bookId = request.params.id;
-  db.get('books')
-    .find({id: bookId})
-    .assign({title: request.body.title})
-    .write();
+  var book = await Book.findByIdAndUpdate(bookId, request.body);
   response.redirect('/books');
 }
