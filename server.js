@@ -18,7 +18,9 @@ var bookRoute = require('./routes/book.route');
 var userRoute = require('./routes/user.route');
 var transactionRoute = require('./routes/transaction.route');
 var authRoute = require('./routes/auth.route');
-var cartRoute = require('./routes/cart.route')
+var cartRoute = require('./routes/cart.route');
+
+var apibookRoute = require('./api/routes/book.route');
 
 var authMiddleware = require('./middlewares/auth.middleware');
 var sessionMiddleware = require('./middlewares/session.middleware');
@@ -42,6 +44,8 @@ app.use('/users', authMiddleware.requireAuth, userRoute);
 app.use('/transactions', authMiddleware.requireAuth, transactionRoute);
 app.use('/auth', authRoute);
 app.use('/cart', cartRoute);
+
+app.use('/api/books', apibookRoute);
 
 app.get("/", (request, response) => {
   response.render('index');
