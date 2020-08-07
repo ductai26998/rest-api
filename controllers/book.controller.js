@@ -10,10 +10,15 @@ cloudinary.config({
 });
 
 module.exports.get = async (request, response) => {
-
   var user = await User.findById(request.signedCookies.userId);
 
   var books = await Book.find();
+  try {
+    var a; 
+    a.b();
+  } catch(error) {
+    response.render('error/index');
+  }
 
   response.render('books/index', {
     isAdmin: function() {
