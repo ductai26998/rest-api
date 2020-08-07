@@ -1,0 +1,161 @@
+openapi: 3.0.0
+# Added by API Auto Mocking Plugin
+servers:
+  - description: SwaggerHub API Auto Mocking
+    url: https://virtserver.swaggerhub.com/test-swagger/1.0.0
+info:
+  description: Test APIs document Swagger
+  version: "1.0.0"
+  title: APIs document Swagger
+  termsOfService: 'http://swagger.io/terms/'
+  contact:
+    email: apiteam@swagger.io
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+tags:
+  - name: user
+    description: Operations about user
+paths:
+  /user:
+    post:
+      tags:
+        - user
+      summary: Create user
+      description: This can only be done by the logged in user.
+      operationId: createUser
+      responses:
+        default:
+          description: successful operation
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+        description: Created user object
+        required: true
+  /user/:id:
+    get:
+      tags:
+        - user
+      summary: Update profile
+      operationId: updateUser
+      parameters:
+        - name: id
+          in: query
+          description: id of user
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          headers:
+            X-Rate-Limit:
+              description: calls per hour allowed by the user
+              schema:
+                type: integer
+                format: int32
+            X-Expires-After:
+              description: date in UTC when token expires
+              schema:
+                type: string
+                format: date-time
+          content:
+            application/json:
+              schema:
+                type: string
+            application/xml:
+              schema:
+                type: string
+        '400':
+          description: Invalid username/password supplied
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+        avatar:
+          type: string
+        isAdmin:
+          type: boolean
+        wrongLoginCount:
+          type: integer
+          format: int32
+        cart:
+          type: object
+      xml:
+        name: User
+    Book:
+      type: object
+      properties:
+        id: 
+          type: string
+        title:
+          type: string
+        cover:
+          type: string
+      xml:
+        name: Book
+    Transaction:
+      type: object
+      properties:
+        id:
+          type: string
+        userId: 
+          type: string
+        bookId:
+          type: string
+      xml:
+        name: Transaction
+  requestBodies:
+    UserArray:
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/User'
+      description: List of user object
+      required: true
+    BookArray:
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/Book'
+      description: List of book object
+      required: true
+    TransactionArray:
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/Transaction'
+      description: List of transaction object
+      required: true
+  securitySchemes:
+    test_auth:
+      type: oauth2
+      flows:
+        implicit:
+          authorizationUrl: 'http://test-swagger.herokuapp.com'
+          scopes:
+            'write:users': modify your account
+            'read:users': read your information
+    api_key:
+      type: apiKey
+      name: api_key
+      in: header

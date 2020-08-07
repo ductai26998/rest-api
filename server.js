@@ -32,12 +32,13 @@ app.set('views', './views');
 
 // make all the files in 'public' available
 // https://expressjs.com/en/starter/static-files.html
-app.use(express.static("public"));
+
+//app.use(express.static("public"));
 app.use(express.json());
 app.use(express.urlencoded({extended:true}));
-app.use(express.static('public'))
 app.use(cookieParser(process.env.SESSION_SECRET));
 app.use(sessionMiddleware);
+app.use(express.static('./dist'));
 
 app.use('/books', authMiddleware.setLocalUser, bookRoute);
 app.use('/users', authMiddleware.requireAuth, userRoute);
@@ -50,6 +51,9 @@ app.use('/api/books', apibookRoute);
 app.get("/", (request, response) => {
   response.render('index');
 });
+// app.get('/', (req, res) => {
+//   res.sendFile('index.html');
+// })
 
 // listen for requests :)
 const listener = app.listen(port, () => {
