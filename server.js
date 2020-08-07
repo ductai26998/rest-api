@@ -21,7 +21,7 @@ var authRoute = require('./routes/auth.route');
 var cartRoute = require('./routes/cart.route');
 
 var apiBookRoute = require('./api/routes/book.route');
-var apiAuthRoute = require('./api/routes/atuth.route');
+var apiAuthRoute = require('./api/routes/auth.route');
 var apiCartRoute = require('./api/routes/cart.route');
 var apiTransactionRoute = require('./api/routes/transaction.route');
 var apiUserRoute = require('./api/routes/user.route');
