@@ -25,7 +25,7 @@ var apibookRoute = require('./api/routes/book.route');
 var authMiddleware = require('./middlewares/auth.middleware');
 var sessionMiddleware = require('./middlewares/session.middleware');
 
-var port = 3000;
+var port = process.env.PORT || 3000;
 
 app.set('view engine', 'pug');
 app.set('views', './views');
