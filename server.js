@@ -20,7 +20,7 @@ var transactionRoute = require('./routes/transaction.route');
 var authRoute = require('./routes/auth.route');
 var cartRoute = require('./routes/cart.route');
 
-var apibookRoute = require('./api/routes/book.route');
+// var apibookRoute = require('./api/routes/book.route');
 
 var authMiddleware = require('./middlewares/auth.middleware');
 var sessionMiddleware = require('./middlewares/session.middleware');
@@ -48,14 +48,11 @@ app.use('/transactions', authMiddleware.requireAuth, transactionRoute);
 app.use('/auth', authRoute);
 app.use('/cart', cartRoute);
 
-app.use('/api/books', apibookRoute);
+// app.use('/api/books', apibookRoute);
 
 app.get("/", (request, response) => {
   response.render('index');
 });
-// app.get('/', (req, res) => {
-//   res.sendFile('index.html');
-// })
 
 // listen for requests :)
 const listener = app.listen(port, () => {
