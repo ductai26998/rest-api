@@ -11,9 +11,9 @@ module.exports.login = (request, response) => {
 module.exports.postLogin = async (request, response) => {
 	var email = request.body.email;
 	var password = request.body.password;
-  var user = await User.findOne({email: email});
+  var user = await User.findOne({email: email}).lean();
   var sessionId = request.signedCookies.sessionId;
-  var session = await Session.findOne({_id: sessionId});
+  var session = await Session.findById(sessionId).lean();
 
   if (!user) {
   	response.render('auth/login', {
@@ -63,9 +63,9 @@ module.exports.postLogin = async (request, response) => {
   if (user.cart) {
     Object.assign(user.cart, session.cart);
   }
-  User.findOneAndUpdate({email: email}, {$set: {cart: user.cart}});
+  await User.findOneAndUpdate({email: email}, {$set: {cart: user.cart}});
 
-	response.cookie("userId", user.id, {
+	response.cookie("userId", user._id, {
     signed: true
   });
   response.redirect('/books');

@@ -8,7 +8,7 @@ var userSchema = new mongoose.Schema({
 	avatar: String,
 	isAdmin: Boolean,
 	wrongLoginCount: Number,
-	cart: Array
+	cart: Object
 });
 
 var User = mongoose.model('User', userSchema, 'users');

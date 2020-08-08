@@ -558,10 +558,7 @@
       "avatar": "updates/a23e676fc8c8397a6393dd8c8edb31a9",
       "isAdmin": "false",
       "wrongLoginCount": 0,
-      "cart": {
-        "1ef1bb66-4650-4d8d-84fa-7e38214fb780": 1,
-        "06cb8ba3-6431-4e7f-b687-db95fb5cab27": 1
-      }
+      "cart": {}
     },
     {
       "name": "hieu",

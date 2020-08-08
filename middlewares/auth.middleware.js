@@ -1,7 +1,7 @@
 var User = require('../models/user.model');
 
 module.exports.requireAuth = async (request, response, next) => {
-	var user = await User.findOne({_id: request.signedCookies.userId});
+	var user = await User.findById(request.signedCookies.userId).lean();
 
 	if (!request.signedCookies.userId) {
 		response.redirect('/auth/login');

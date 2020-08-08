@@ -15,7 +15,7 @@ module.exports.postLogin = async (request, response) => {
   if (user.cart) {
     Object.assign(user.cart, session.cart);
   }
-  User.findOneAndUpdate({email: email}, {$set: {cart: user.cart}});
+  await User.findOneAndUpdate({email: email}, {$set: {cart: user.cart}});
 
   response.json(user);
 };
