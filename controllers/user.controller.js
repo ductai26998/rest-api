@@ -33,7 +33,7 @@ module.exports.create = (request, response) => {
 
 module.exports.postCreate = async (request, response) => {
   if (!request.file) {
-    request.body.avatar = "updates/avt.jpg";
+    request.body.avatar = "https://hinhanhdephd.com/wp-content/uploads/2020/07/hinh-anh-mat-cuoi-sieu-cute-dang-yeu-14-600x375.jpg";
   } else {
     request.body.avatar = request.file.path.split("\\").slice(1).join("/");
     cloudinary.uploader.upload(request.body.avatar, function(error, result) {
@@ -88,7 +88,9 @@ module.exports.postAvatar = async (request, response) => {
     request.body.avatar = "https://hinhanhdephd.com/wp-content/uploads/2020/07/hinh-anh-mat-cuoi-sieu-cute-dang-yeu-14-600x375.jpg";
   } else {
     request.body.avatar = request.file.path.split("\\").slice(1).join("/");
-    const result = await cloudinary.uploader.upload(request.file.path);
+    cloudinary.uploader.upload(request.body.avatar, function(error, result) {
+      console.log(result, error)
+    });
 
     await User.findByIdAndUpdate(id, {avatar: request.body.avatar});
   }
